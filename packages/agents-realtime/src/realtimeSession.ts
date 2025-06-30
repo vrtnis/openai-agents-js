@@ -276,7 +276,7 @@ export class RealtimeSession<
       handoff.getHandoffAsFunctionTool(),
     );
     this.#currentTools = [
-      ...(await this.#currentAgent.getAllTools()).filter(
+      ...(await this.#currentAgent.getAllTools(this.#context)).filter(
         (tool) => tool.type === 'function',
       ),
       ...handoffTools,
@@ -446,7 +446,10 @@ export class RealtimeSession<
     );
 
     const functionToolMap = new Map(
-      (await this.#currentAgent.getAllTools()).map((tool) => [tool.name, tool]),
+      (await this.#currentAgent.getAllTools(this.#context)).map((tool) => [
+        tool.name,
+        tool,
+      ]),
     );
 
     const possibleHandoff = handoffMap.get(toolCall.name);
