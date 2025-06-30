@@ -274,10 +274,11 @@ export class RealtimeSession<
     const handoffTools = handoffs.map((handoff) =>
       handoff.getHandoffAsFunctionTool(),
     );
+    const allTools = await (
+      this.#currentAgent as RealtimeAgent<TBaseContext>
+    ).getAllTools(this.#context);
     this.#currentTools = [
-      ...(await this.#currentAgent.getAllTools(this.#context)).filter(
-        (tool) => tool.type === 'function',
-      ),
+      ...allTools.filter((tool) => tool.type === 'function'),
       ...handoffTools,
     ];
   }
@@ -444,12 +445,10 @@ export class RealtimeSession<
         .map((handoff) => [handoff.toolName, handoff]),
     );
 
-    const functionToolMap = new Map(
-      (await this.#currentAgent.getAllTools(this.#context)).map((tool) => [
-        tool.name,
-        tool,
-      ]),
-    );
+    const allTools = await (
+      this.#currentAgent as RealtimeAgent<TBaseContext>
+    ).getAllTools(this.#context);
+    const functionToolMap = new Map(allTools.map((tool) => [tool.name, tool]));
 
     const possibleHandoff = handoffMap.get(toolCall.name);
     if (possibleHandoff) {
