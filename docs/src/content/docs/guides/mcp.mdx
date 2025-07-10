@@ -105,7 +105,7 @@ using `createStaticToolFilter` or a custom function:
 ```ts
 const server = new MCPServerStdio({
   fullCommand: 'my-server',
-  toolFilter: createStaticToolFilter(['safe_tool'], ['danger_tool']),
+  toolFilter: createStaticToolFilter({ allowed: ['safe_tool'], blocked: ['danger_tool'] }),
 });
 
 const dynamicServer = new MCPServerStreamableHttp({
