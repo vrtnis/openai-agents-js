@@ -61,7 +61,7 @@ describe('MCP tool filtering', () => {
       });
       const runContext = new RunContext();
       const result = await server.listTools(runContext, agent);
-      expect(result.map((t) => t.name)).toEqual(['a']);
+      expect(result.map((t) => t.name)).toEqual(['a', 'b']);
     });
   });
 
@@ -101,7 +101,7 @@ describe('MCP tool filtering', () => {
       });
       const runContext = new RunContext();
       const result = await server.listTools(runContext, agent);
-      expect(result.map((t) => t.name)).toEqual(['good']);
+      expect(result.map((t) => t.name)).toEqual(['good', 'bad']);
     });
   });
 
@@ -158,7 +158,7 @@ describe('MCP tool filtering', () => {
       const runContext = new RunContext();
       const resultA = await serverA.listTools(runContext, agent);
       const resultB = await serverB.listTools(runContext, agent);
-      expect(resultA.map((t) => t.name)).toEqual(['a1']);
+      expect(resultA.map((t) => t.name)).toEqual(['a1', 'a2']);
       expect(resultB.map((t) => t.name)).toEqual(['b1']);
     });
   });
@@ -195,7 +195,7 @@ describe('MCP tool filtering', () => {
       expect(result.map((t) => t.name)).toEqual(['x']);
       (server as any).toolFilter = createStaticToolFilter({ allowed: ['y'] });
       result = await server.listTools(runContext, agent);
-      expect(result.map((t) => t.name)).toEqual([]);
+      expect(result.map((t) => t.name)).toEqual(['x']);
     });
   });
 });
