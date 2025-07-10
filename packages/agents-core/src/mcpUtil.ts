@@ -28,19 +28,19 @@ export interface ToolFilterStatic {
 }
 
 /** Convenience helper to create a static tool filter. */
-export function createStaticToolFilter(
-  allowedToolNames?: string[],
-  blockedToolNames?: string[],
-): ToolFilterStatic | undefined {
-  if (!allowedToolNames && !blockedToolNames) {
+export function createStaticToolFilter(options?: {
+  allowed?: string[];
+  blocked?: string[];
+}): ToolFilterStatic | undefined {
+  if (!options?.allowed && !options?.blocked) {
     return undefined;
   }
   const filter: ToolFilterStatic = {};
-  if (allowedToolNames) {
-    filter.allowedToolNames = allowedToolNames;
+  if (options?.allowed) {
+    filter.allowedToolNames = options.allowed;
   }
-  if (blockedToolNames) {
-    filter.blockedToolNames = blockedToolNames;
+  if (options?.blocked) {
+    filter.blockedToolNames = options.blocked;
   }
   return filter;
 }
