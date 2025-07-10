@@ -12,10 +12,10 @@ async function main() {
   const mcpServer = new MCPServerStdio({
     name: 'Filesystem Server with filter',
     fullCommand: `npx -y @modelcontextprotocol/server-filesystem ${samplesDir}`,
-    toolFilter: createStaticToolFilter(
-      ['read_file', 'list_directory'],
-      ['write_file'],
-    ),
+    toolFilter: createStaticToolFilter({
+      allowed: ['read_file', 'list_directory'],
+      blocked: ['write_file'],
+    }),
   });
 
   await mcpServer.connect();

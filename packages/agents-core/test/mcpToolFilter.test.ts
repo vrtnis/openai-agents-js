@@ -49,7 +49,7 @@ describe('MCP tool filtering', () => {
       const server = new StubServer(
         's',
         tools,
-        createStaticToolFilter(['a'], ['b']),
+        createStaticToolFilter({ allowed: ['a'], blocked: ['b'] }),
       );
       const agent = new Agent({
         name: 'agent',
@@ -144,7 +144,7 @@ describe('MCP tool filtering', () => {
       const serverA = new StubServer(
         'A',
         toolsA,
-        createStaticToolFilter(['a1']),
+        createStaticToolFilter({ allowed: ['a1'] }),
       );
       const serverB = new StubServer('B', toolsB);
       const agent = new Agent({
@@ -180,7 +180,7 @@ describe('MCP tool filtering', () => {
       const server = new StubServer(
         'cache',
         tools,
-        createStaticToolFilter(['x']),
+        createStaticToolFilter({ allowed: ['x'] }),
       );
       const agent = new Agent({
         name: 'agent',
@@ -193,7 +193,7 @@ describe('MCP tool filtering', () => {
       const runContext = new RunContext();
       let result = await server.listTools(runContext, agent);
       expect(result.map((t) => t.name)).toEqual(['x']);
-      server.toolFilter = createStaticToolFilter(['y']);
+      (server as any).toolFilter = createStaticToolFilter({ allowed: ['y'] });
       result = await server.listTools(runContext, agent);
       expect(result.map((t) => t.name)).toEqual([]);
     });
