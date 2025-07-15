@@ -2,7 +2,7 @@ import {
   Agent,
   run,
   MCPServerStdio,
-  createStaticToolFilter,
+  createMCPToolStaticFilter,
   withTrace,
 } from '@openai/agents';
 import * as path from 'node:path';
@@ -12,7 +12,7 @@ async function main() {
   const mcpServer = new MCPServerStdio({
     name: 'Filesystem Server with filter',
     fullCommand: `npx -y @modelcontextprotocol/server-filesystem ${samplesDir}`,
-    toolFilter: createStaticToolFilter({
+    toolFilter: createMCPToolStaticFilter({
       allowed: ['read_file', 'list_directory'],
       blocked: ['write_file'],
     }),

@@ -75,10 +75,10 @@ export {
   MCPServerStreamableHttp,
 } from './mcp';
 export {
-  ToolFilterCallable,
-  ToolFilterContext,
-  ToolFilterStatic,
-  createStaticToolFilter,
+  MCPToolFilterCallable,
+  MCPToolFilterContext,
+  MCPToolFilterStatic,
+  createMCPToolStaticFilter,
 } from './mcpUtil';
 export {
   Model,
