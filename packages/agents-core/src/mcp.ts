@@ -14,7 +14,7 @@ import {
   JsonObjectSchemaStrict,
   UnknownContext,
 } from './types';
-import type { ToolFilterCallable, ToolFilterStatic } from './mcpUtil';
+import type { MCPToolFilterCallable, MCPToolFilterStatic } from './mcpUtil';
 import type { RunContext } from './runContext';
 import type { Agent } from './agent';
 
@@ -46,7 +46,7 @@ export interface MCPServer {
 export abstract class BaseMCPServerStdio implements MCPServer {
   public cacheToolsList: boolean;
   protected _cachedTools: any[] | undefined = undefined;
-  protected toolFilter?: ToolFilterCallable | ToolFilterStatic;
+  protected toolFilter?: MCPToolFilterCallable | MCPToolFilterStatic;
 
   protected logger: Logger;
   constructor(options: MCPServerStdioOptions) {
@@ -83,7 +83,7 @@ export abstract class BaseMCPServerStdio implements MCPServer {
 export abstract class BaseMCPServerStreamableHttp implements MCPServer {
   public cacheToolsList: boolean;
   protected _cachedTools: any[] | undefined = undefined;
-  protected toolFilter?: ToolFilterCallable | ToolFilterStatic;
+  protected toolFilter?: MCPToolFilterCallable | MCPToolFilterStatic;
 
   protected logger: Logger;
   constructor(options: MCPServerStreamableHttpOptions) {
@@ -386,7 +386,7 @@ export interface BaseMCPServerStdioOptions {
   encoding?: string;
   encodingErrorHandler?: 'strict' | 'ignore' | 'replace';
   logger?: Logger;
-  toolFilter?: ToolFilterCallable | ToolFilterStatic;
+  toolFilter?: MCPToolFilterCallable | MCPToolFilterStatic;
 }
 export interface DefaultMCPServerStdioOptions
   extends BaseMCPServerStdioOptions {
@@ -407,7 +407,7 @@ export interface MCPServerStreamableHttpOptions {
   clientSessionTimeoutSeconds?: number;
   name?: string;
   logger?: Logger;
-  toolFilter?: ToolFilterCallable | ToolFilterStatic;
+  toolFilter?: MCPToolFilterCallable | MCPToolFilterStatic;
 
   // ----------------------------------------------------
   // OAuth

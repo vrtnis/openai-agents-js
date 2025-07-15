@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { withTrace } from '../src/tracing';
 import { NodeMCPServerStdio } from '../src/shims/mcp-server/node';
-import { createStaticToolFilter } from '../src/mcpUtil';
+import { createMCPToolStaticFilter } from '../src/mcpUtil';
 import { Agent } from '../src/agent';
 import { RunContext } from '../src/runContext';
 
@@ -49,7 +49,7 @@ describe('MCP tool filtering', () => {
       const server = new StubServer(
         's',
         tools,
-        createStaticToolFilter({ allowed: ['a'], blocked: ['b'] }),
+        createMCPToolStaticFilter({ allowed: ['a'], blocked: ['b'] }),
       );
       const agent = new Agent({
         name: 'agent',
@@ -144,7 +144,7 @@ describe('MCP tool filtering', () => {
       const serverA = new StubServer(
         'A',
         toolsA,
-        createStaticToolFilter({ allowed: ['a1'] }),
+        createMCPToolStaticFilter({ allowed: ['a1'] }),
       );
       const serverB = new StubServer('B', toolsB);
       const agent = new Agent({
@@ -180,7 +180,7 @@ describe('MCP tool filtering', () => {
       const server = new StubServer(
         'cache',
         tools,
-        createStaticToolFilter({ allowed: ['x'] }),
+        createMCPToolStaticFilter({ allowed: ['x'] }),
       );
       const agent = new Agent({
         name: 'agent',
@@ -193,7 +193,9 @@ describe('MCP tool filtering', () => {
       const runContext = new RunContext();
       let result = await server.listTools(runContext, agent);
       expect(result.map((t) => t.name)).toEqual(['x']);
-      (server as any).toolFilter = createStaticToolFilter({ allowed: ['y'] });
+      (server as any).toolFilter = createMCPToolStaticFilter({
+        allowed: ['y'],
+      });
       result = await server.listTools(runContext, agent);
       expect(result.map((t) => t.name)).toEqual(['x']);
     });

@@ -4,7 +4,7 @@ import type { MCPTool } from './mcp';
 import type { UnknownContext } from './types';
 
 /** Context information available to tool filter functions. */
-export interface ToolFilterContext<TContext = UnknownContext> {
+export interface MCPToolFilterContext<TContext = UnknownContext> {
   /** The current run context. */
   runContext: RunContext<TContext>;
   /** The agent requesting the tools. */
@@ -14,13 +14,13 @@ export interface ToolFilterContext<TContext = UnknownContext> {
 }
 
 /** A function that determines whether a tool should be available. */
-export type ToolFilterCallable<TContext = UnknownContext> = (
-  context: ToolFilterContext<TContext>,
+export type MCPToolFilterCallable<TContext = UnknownContext> = (
+  context: MCPToolFilterContext<TContext>,
   tool: MCPTool,
 ) => boolean | Promise<boolean>;
 
 /** Static tool filter configuration using allow and block lists. */
-export interface ToolFilterStatic {
+export interface MCPToolFilterStatic {
   /** Optional list of tool names to allow. */
   allowedToolNames?: string[];
   /** Optional list of tool names to block. */
@@ -28,14 +28,14 @@ export interface ToolFilterStatic {
 }
 
 /** Convenience helper to create a static tool filter. */
-export function createStaticToolFilter(options?: {
+export function createMCPToolStaticFilter(options?: {
   allowed?: string[];
   blocked?: string[];
-}): ToolFilterStatic | undefined {
+}): MCPToolFilterStatic | undefined {
   if (!options?.allowed && !options?.blocked) {
     return undefined;
   }
-  const filter: ToolFilterStatic = {};
+  const filter: MCPToolFilterStatic = {};
   if (options?.allowed) {
     filter.allowedToolNames = options.allowed;
   }
