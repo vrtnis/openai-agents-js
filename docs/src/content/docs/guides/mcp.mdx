@@ -100,17 +100,21 @@ Only enable this if you're confident the tool list won't change. To invalidate t
 ### Tool filtering
 
 You can restrict which tools are exposed from each server. Pass either a static filter
-using `createStaticToolFilter` or a custom function:
+using `createMCPToolStaticFilter` or a custom function:
 
 ```ts
 const server = new MCPServerStdio({
   fullCommand: 'my-server',
-  toolFilter: createStaticToolFilter({ allowed: ['safe_tool'], blocked: ['danger_tool'] }),
+  toolFilter: createMCPToolStaticFilter({
+    allowed: ['safe_tool'],
+    blocked: ['danger_tool'],
+  }),
 });
 
 const dynamicServer = new MCPServerStreamableHttp({
   url: 'http://localhost:3000',
-  toolFilter: ({ runContext }, tool) => runContext.context.allowAll || tool.name !== 'admin',
+  toolFilter: ({ runContext }, tool) =>
+    runContext.context.allowAll || tool.name !== 'admin',
 });
 ```
 
