@@ -14,11 +14,7 @@ import {
   JsonObjectSchemaStrict,
   UnknownContext,
 } from './types';
-import type {
-  ToolFilterCallable,
-  ToolFilterStatic,
-  ToolFilterContext,
-} from './mcpUtil';
+import type { ToolFilterCallable, ToolFilterStatic } from './mcpUtil';
 import type { RunContext } from './runContext';
 import type { Agent } from './agent';
 
@@ -34,7 +30,6 @@ export const DEFAULT_STREAMABLE_HTTP_MCP_CLIENT_LOGGER_NAME =
  */
 export interface MCPServer {
   cacheToolsList: boolean;
-  toolFilter?: ToolFilterCallable | ToolFilterStatic;
   connect(): Promise<void>;
   readonly name: string;
   close(): Promise<void>;
@@ -51,7 +46,7 @@ export interface MCPServer {
 export abstract class BaseMCPServerStdio implements MCPServer {
   public cacheToolsList: boolean;
   protected _cachedTools: any[] | undefined = undefined;
-  public toolFilter?: ToolFilterCallable | ToolFilterStatic;
+  protected toolFilter?: ToolFilterCallable | ToolFilterStatic;
 
   protected logger: Logger;
   constructor(options: MCPServerStdioOptions) {
@@ -88,7 +83,7 @@ export abstract class BaseMCPServerStdio implements MCPServer {
 export abstract class BaseMCPServerStreamableHttp implements MCPServer {
   public cacheToolsList: boolean;
   protected _cachedTools: any[] | undefined = undefined;
-  public toolFilter?: ToolFilterCallable | ToolFilterStatic;
+  protected toolFilter?: ToolFilterCallable | ToolFilterStatic;
 
   protected logger: Logger;
   constructor(options: MCPServerStreamableHttpOptions) {
@@ -160,13 +155,13 @@ export class MCPServerStdio extends BaseMCPServerStdio {
     return this.underlying.close();
   }
   async listTools(
-    _runContext?: RunContext<any>,
-    _agent?: Agent<any, any>,
+    runContext?: RunContext<any>,
+    agent?: Agent<any, any>,
   ): Promise<MCPTool[]> {
     if (this.cacheToolsList && this._cachedTools) {
       return this._cachedTools;
     }
-    const tools = await this.underlying.listTools();
+    const tools = await this.underlying.listTools(runContext, agent);
     if (this.cacheToolsList) {
       this._cachedTools = tools;
     }
@@ -196,13 +191,13 @@ export class MCPServerStreamableHttp extends BaseMCPServerStreamableHttp {
     return this.underlying.close();
   }
   async listTools(
-    _runContext?: RunContext<any>,
-    _agent?: Agent<any, any>,
+    runContext?: RunContext<any>,
+    agent?: Agent<any, any>,
   ): Promise<MCPTool[]> {
     if (this.cacheToolsList && this._cachedTools) {
       return this._cachedTools;
     }
-    const tools = await this.underlying.listTools();
+    const tools = await this.underlying.listTools(runContext, agent);
     if (this.cacheToolsList) {
       this._cachedTools = tools;
     }
@@ -273,16 +268,7 @@ async function getFunctionToolsFromServer<TContext = UnknownContext>(
   }
   return withMCPListToolsSpan(
     async (span) => {
-      let mcpTools = await server.listTools(runContext, agent);
-      if (server.toolFilter) {
-        mcpTools = await filterMcpTools(
-          mcpTools,
-          server.toolFilter as ToolFilterCallable<TContext> | ToolFilterStatic,
-          runContext,
-          agent,
-          server.name,
-        );
-      }
+      const mcpTools = await server.listTools(runContext, agent);
       span.spanData.result = mcpTools.map((t) => t.name);
       const tools: FunctionTool<TContext, any, string>[] = mcpTools.map((t) =>
         mcpToFunctionTool(t, server, convertSchemasToStrict),
@@ -383,41 +369,6 @@ function ensureStrictJsonSchema(
   };
   if (!out.required) out.required = [];
   return out;
-}
-
-async function filterMcpTools<TContext = UnknownContext>(
-  tools: MCPTool[],
-  filter: ToolFilterCallable<TContext> | ToolFilterStatic,
-  runContext: RunContext<TContext> | undefined,
-  agent: Agent<TContext, any> | undefined,
-  serverName: string,
-): Promise<MCPTool[]> {
-  if (typeof filter === 'function') {
-    if (!runContext || !agent) {
-      return tools;
-    }
-    const ctx = {
-      runContext,
-      agent,
-      serverName,
-    } as ToolFilterContext<TContext>;
-    const result: MCPTool[] = [];
-    for (const tool of tools) {
-      if (await filter(ctx, tool)) {
-        result.push(tool);
-      }
-    }
-    return result;
-  }
-  return tools.filter((t) => {
-    if (filter.allowedToolNames && !filter.allowedToolNames.includes(t.name)) {
-      return false;
-    }
-    if (filter.blockedToolNames && filter.blockedToolNames.includes(t.name)) {
-      return false;
-    }
-    return true;
-  });
 }
 
 /**
