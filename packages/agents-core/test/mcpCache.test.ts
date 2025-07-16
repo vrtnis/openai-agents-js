@@ -4,6 +4,8 @@ import type { FunctionTool } from '../src/tool';
 import { withTrace } from '../src/tracing';
 import { NodeMCPServerStdio } from '../src/shims/mcp-server/node';
 import type { CallToolResultContent } from '../src/mcp';
+import { RunContext } from '../src/runContext';
+import { Agent } from '../src/agent';
 
 class StubServer extends NodeMCPServerStdio {
   public toolList: any[];
@@ -49,15 +51,27 @@ describe('MCP tools cache invalidation', () => {
       ];
       const server = new StubServer('server', toolsA);
 
-      let tools = await getAllMcpTools([server]);
+      let tools = await getAllMcpTools(
+        [server],
+        new RunContext({}),
+        new Agent({ name: 'test' }),
+      );
       expect(tools.map((t) => t.name)).toEqual(['a']);
 
       server.toolList = toolsB;
-      tools = await getAllMcpTools([server]);
+      tools = await getAllMcpTools(
+        [server],
+        new RunContext({}),
+        new Agent({ name: 'test' }),
+      );
       expect(tools.map((t) => t.name)).toEqual(['a']);
 
       await server.invalidateToolsCache();
-      tools = await getAllMcpTools([server]);
+      tools = await getAllMcpTools(
+        [server],
+        new RunContext({}),
+        new Agent({ name: 'test' }),
+      );
       expect(tools.map((t) => t.name)).toEqual(['b']);
     });
   });

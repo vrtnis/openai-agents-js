@@ -30,13 +30,11 @@ export const DEFAULT_STREAMABLE_HTTP_MCP_CLIENT_LOGGER_NAME =
  */
 export interface MCPServer {
   cacheToolsList: boolean;
+  toolFilter?: MCPToolFilterCallable | MCPToolFilterStatic;
   connect(): Promise<void>;
   readonly name: string;
   close(): Promise<void>;
-  listTools(
-    runContext?: RunContext<any>,
-    agent?: Agent<any, any>,
-  ): Promise<MCPTool[]>;
+  listTools(): Promise<MCPTool[]>;
   callTool(
     toolName: string,
     args: Record<string, unknown> | null,
@@ -47,7 +45,7 @@ export interface MCPServer {
 export abstract class BaseMCPServerStdio implements MCPServer {
   public cacheToolsList: boolean;
   protected _cachedTools: any[] | undefined = undefined;
-  protected toolFilter?: MCPToolFilterCallable | MCPToolFilterStatic;
+  public toolFilter?: MCPToolFilterCallable | MCPToolFilterStatic;
 
   protected logger: Logger;
   constructor(options: MCPServerStdioOptions) {
@@ -60,10 +58,7 @@ export abstract class BaseMCPServerStdio implements MCPServer {
   abstract get name(): string;
   abstract connect(): Promise<void>;
   abstract close(): Promise<void>;
-  abstract listTools(
-    runContext?: RunContext<any>,
-    agent?: Agent<any, any>,
-  ): Promise<any[]>;
+  abstract listTools(): Promise<any[]>;
   abstract callTool(
     _toolName: string,
     _args: Record<string, unknown> | null,
@@ -85,7 +80,7 @@ export abstract class BaseMCPServerStdio implements MCPServer {
 export abstract class BaseMCPServerStreamableHttp implements MCPServer {
   public cacheToolsList: boolean;
   protected _cachedTools: any[] | undefined = undefined;
-  protected toolFilter?: MCPToolFilterCallable | MCPToolFilterStatic;
+  public toolFilter?: MCPToolFilterCallable | MCPToolFilterStatic;
 
   protected logger: Logger;
   constructor(options: MCPServerStreamableHttpOptions) {
@@ -99,10 +94,7 @@ export abstract class BaseMCPServerStreamableHttp implements MCPServer {
   abstract get name(): string;
   abstract connect(): Promise<void>;
   abstract close(): Promise<void>;
-  abstract listTools(
-    runContext?: RunContext<any>,
-    agent?: Agent<any, any>,
-  ): Promise<any[]>;
+  abstract listTools(): Promise<any[]>;
   abstract callTool(
     _toolName: string,
     _args: Record<string, unknown> | null,
@@ -157,14 +149,11 @@ export class MCPServerStdio extends BaseMCPServerStdio {
   close(): Promise<void> {
     return this.underlying.close();
   }
-  async listTools(
-    runContext?: RunContext<any>,
-    agent?: Agent<any, any>,
-  ): Promise<MCPTool[]> {
+  async listTools(): Promise<MCPTool[]> {
     if (this.cacheToolsList && this._cachedTools) {
       return this._cachedTools;
     }
-    const tools = await this.underlying.listTools(runContext, agent);
+    const tools = await this.underlying.listTools();
     if (this.cacheToolsList) {
       this._cachedTools = tools;
     }
@@ -196,14 +185,11 @@ export class MCPServerStreamableHttp extends BaseMCPServerStreamableHttp {
   close(): Promise<void> {
     return this.underlying.close();
   }
-  async listTools(
-    runContext?: RunContext<any>,
-    agent?: Agent<any, any>,
-  ): Promise<MCPTool[]> {
+  async listTools(): Promise<MCPTool[]> {
     if (this.cacheToolsList && this._cachedTools) {
       return this._cachedTools;
     }
-    const tools = await this.underlying.listTools(runContext, agent);
+    const tools = await this.underlying.listTools();
     if (this.cacheToolsList) {
       this._cachedTools = tools;
     }
@@ -226,18 +212,18 @@ export class MCPServerStreamableHttp extends BaseMCPServerStreamableHttp {
  */
 export async function getAllMcpFunctionTools<TContext = UnknownContext>(
   mcpServers: MCPServer[],
+  runContext: RunContext<TContext>,
+  agent: Agent<any, any>,
   convertSchemasToStrict = false,
-  runContext?: RunContext<TContext>,
-  agent?: Agent<TContext, any>,
 ): Promise<Tool<TContext>[]> {
   const allTools: Tool<TContext>[] = [];
   const toolNames = new Set<string>();
   for (const server of mcpServers) {
     const serverTools = await getFunctionToolsFromServer(
       server,
-      convertSchemasToStrict,
       runContext,
       agent,
+      convertSchemasToStrict,
     );
     const serverToolNames = new Set(serverTools.map((t) => t.name));
     const intersection = [...serverToolNames].filter((n) => toolNames.has(n));
@@ -268,9 +254,9 @@ export async function invalidateServerToolsCache(serverName: string) {
  */
 async function getFunctionToolsFromServer<TContext = UnknownContext>(
   server: MCPServer,
+  runContext: RunContext<TContext>,
+  agent: Agent<any, any>,
   convertSchemasToStrict: boolean,
-  runContext?: RunContext<TContext>,
-  agent?: Agent<TContext, any>,
 ): Promise<FunctionTool<TContext, any, unknown>[]> {
   if (server.cacheToolsList && _cachedTools[server.name]) {
     return _cachedTools[server.name].map((t) =>
@@ -279,7 +265,53 @@ async function getFunctionToolsFromServer<TContext = UnknownContext>(
   }
   return withMCPListToolsSpan(
     async (span) => {
-      const mcpTools = await server.listTools(runContext, agent);
+      const fetchedMcpTools = await server.listTools();
+      const mcpTools: MCPTool[] = [];
+      const context = {
+        runContext,
+        agent,
+        serverName: server.name,
+      };
+      for (const tool of fetchedMcpTools) {
+        const filter = server.toolFilter;
+        if (filter) {
+          if (filter && typeof filter === 'function') {
+            const filtered = await filter(context, tool);
+            if (!filtered) {
+              globalLogger.debug(
+                `MCP Tool (server: ${server.name}, tool: ${tool.name}) is blocked by the callable filter.`,
+              );
+              continue; // skip this tool
+            }
+          } else {
+            const allowedToolNames = filter.allowedToolNames ?? [];
+            const blockedToolNames = filter.blockedToolNames ?? [];
+            if (allowedToolNames.length > 0 || blockedToolNames.length > 0) {
+              const allowed =
+                allowedToolNames.length > 0
+                  ? allowedToolNames.includes(tool.name)
+                  : true;
+              const blocked =
+                blockedToolNames.length > 0
+                  ? blockedToolNames.includes(tool.name)
+                  : false;
+              if (!allowed || blocked) {
+                if (blocked) {
+                  globalLogger.debug(
+                    `MCP Tool (server: ${server.name}, tool: ${tool.name}) is blocked by the static filter.`,
+                  );
+                } else if (!allowed) {
+                  globalLogger.debug(
+                    `MCP Tool (server: ${server.name}, tool: ${tool.name}) is not allowed by the static filter.`,
+                  );
+                }
+                continue; // skip this tool
+              }
+            }
+          }
+        }
+        mcpTools.push(tool);
+      }
       span.spanData.result = mcpTools.map((t) => t.name);
       const tools: FunctionTool<TContext, any, string>[] = mcpTools.map((t) =>
         mcpToFunctionTool(t, server, convertSchemasToStrict),
@@ -298,15 +330,15 @@ async function getFunctionToolsFromServer<TContext = UnknownContext>(
  */
 export async function getAllMcpTools<TContext = UnknownContext>(
   mcpServers: MCPServer[],
+  runContext: RunContext<TContext>,
+  agent: Agent<TContext, any>,
   convertSchemasToStrict = false,
-  runContext?: RunContext<TContext>,
-  agent?: Agent<TContext, any>,
 ): Promise<Tool<TContext>[]> {
   return getAllMcpFunctionTools(
     mcpServers,
-    convertSchemasToStrict,
     runContext,
     agent,
+    convertSchemasToStrict,
   );
 }
 
