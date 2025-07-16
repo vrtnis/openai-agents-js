@@ -29,7 +29,10 @@ async function main() {
       });
 
       console.log('Listing sample files:');
-      let result = await run(agent, 'List the files in the current directory.');
+      let result = await run(
+        agent,
+        'List the files in the sample_files directory.',
+      );
       console.log(result.finalOutput);
 
       console.log('\nAttempting to write a file (should be blocked):');
