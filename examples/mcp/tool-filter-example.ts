@@ -24,8 +24,7 @@ async function main() {
     await withTrace('MCP Tool Filter Example', async () => {
       const agent = new Agent({
         name: 'MCP Assistant',
-        instructions:
-          'Use the filesystem tools to answer questions. The write_file tool is blocked via toolFilter.',
+        instructions: 'Use the filesystem tools to answer questions.',
         mcpServers: [mcpServer],
       });
 
@@ -36,7 +35,7 @@ async function main() {
       console.log('\nAttempting to write a file (should be blocked):');
       result = await run(
         agent,
-        'Create a file named test.txt with the text "hello"',
+        'Create a file named sample_files/test.txt with the text "hello"',
       );
       console.log(result.finalOutput);
     });
