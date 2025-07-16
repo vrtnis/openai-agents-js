@@ -12,8 +12,6 @@ import {
   invalidateServerToolsCache,
 } from '../../mcp';
 import logger from '../../logger';
-import type { RunContext } from '../../runContext';
-import type { Agent } from '../../agent';
 
 export interface SessionMessage {
   message: any;
@@ -98,10 +96,7 @@ export class NodeMCPServerStdio extends BaseMCPServerStdio {
     this._cacheDirty = true;
   }
 
-  async listTools(
-    _runContext?: RunContext<any>,
-    _agent?: Agent<any, any>,
-  ): Promise<MCPTool[]> {
+  async listTools(): Promise<MCPTool[]> {
     const { ListToolsResultSchema } = await import(
       '@modelcontextprotocol/sdk/types.js'
     ).catch(failedToImport);
@@ -218,10 +213,7 @@ export class NodeMCPServerStreamableHttp extends BaseMCPServerStreamableHttp {
     this._cacheDirty = true;
   }
 
-  async listTools(
-    _runContext?: RunContext<any>,
-    _agent?: Agent<any, any>,
-  ): Promise<MCPTool[]> {
+  async listTools(): Promise<MCPTool[]> {
     const { ListToolsResultSchema } = await import(
       '@modelcontextprotocol/sdk/types.js'
     ).catch(failedToImport);
