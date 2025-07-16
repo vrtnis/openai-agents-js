@@ -518,7 +518,7 @@ export class Agent<
     runContext: RunContext<TContext>,
   ): Promise<Tool<TContext>[]> {
     if (this.mcpServers.length > 0) {
-      return getAllMcpTools(this.mcpServers, false, runContext, this);
+      return getAllMcpTools(this.mcpServers, runContext, this, false);
     }
 
     return [];

@@ -2,8 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { withTrace } from '../src/tracing';
 import { NodeMCPServerStdio } from '../src/shims/mcp-server/node';
 import { createMCPToolStaticFilter } from '../src/mcpUtil';
-import { Agent } from '../src/agent';
-import { RunContext } from '../src/runContext';
 
 class StubServer extends NodeMCPServerStdio {
   public toolList: any[];
@@ -51,16 +49,7 @@ describe('MCP tool filtering', () => {
         tools,
         createMCPToolStaticFilter({ allowed: ['a'], blocked: ['b'] }),
       );
-      const agent = new Agent({
-        name: 'agent',
-        instructions: '',
-        model: '',
-        modelSettings: {},
-        tools: [],
-        mcpServers: [],
-      });
-      const runContext = new RunContext();
-      const result = await server.listTools(runContext, agent);
+      const result = await server.listTools();
       expect(result.map((t) => t.name)).toEqual(['a', 'b']);
     });
   });
@@ -91,16 +80,7 @@ describe('MCP tool filtering', () => {
       ];
       const filter = (_ctx: any, tool: any) => tool.name !== 'bad';
       const server = new StubServer('s', tools, filter);
-      const agent = new Agent({
-        name: 'agent',
-        instructions: '',
-        model: '',
-        modelSettings: {},
-        tools: [],
-        mcpServers: [],
-      });
-      const runContext = new RunContext();
-      const result = await server.listTools(runContext, agent);
+      const result = await server.listTools();
       expect(result.map((t) => t.name)).toEqual(['good', 'bad']);
     });
   });
@@ -147,17 +127,8 @@ describe('MCP tool filtering', () => {
         createMCPToolStaticFilter({ allowed: ['a1'] }),
       );
       const serverB = new StubServer('B', toolsB);
-      const agent = new Agent({
-        name: 'agent',
-        instructions: '',
-        model: '',
-        modelSettings: {},
-        tools: [],
-        mcpServers: [],
-      });
-      const runContext = new RunContext();
-      const resultA = await serverA.listTools(runContext, agent);
-      const resultB = await serverB.listTools(runContext, agent);
+      const resultA = await serverA.listTools();
+      const resultB = await serverB.listTools();
       expect(resultA.map((t) => t.name)).toEqual(['a1', 'a2']);
       expect(resultB.map((t) => t.name)).toEqual(['b1']);
     });
@@ -182,21 +153,12 @@ describe('MCP tool filtering', () => {
         tools,
         createMCPToolStaticFilter({ allowed: ['x'] }),
       );
-      const agent = new Agent({
-        name: 'agent',
-        instructions: '',
-        model: '',
-        modelSettings: {},
-        tools: [],
-        mcpServers: [],
-      });
-      const runContext = new RunContext();
-      let result = await server.listTools(runContext, agent);
+      let result = await server.listTools();
       expect(result.map((t) => t.name)).toEqual(['x']);
       (server as any).toolFilter = createMCPToolStaticFilter({
         allowed: ['y'],
       });
-      result = await server.listTools(runContext, agent);
+      result = await server.listTools();
       expect(result.map((t) => t.name)).toEqual(['x']);
     });
   });
