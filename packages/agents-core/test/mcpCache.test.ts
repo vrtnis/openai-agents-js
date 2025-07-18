@@ -87,7 +87,11 @@ describe('MCP tools cache invalidation', () => {
       ];
 
       const serverA = new StubServer('server', tools);
-      await getAllMcpTools([serverA]);
+      await getAllMcpTools(
+        [serverA],
+        new RunContext({}),
+        new Agent({ name: 'test' }),
+      );
 
       const serverB = new StubServer('server', tools);
       let called = false;
@@ -96,7 +100,11 @@ describe('MCP tools cache invalidation', () => {
         return [];
       };
 
-      const cachedTools = (await getAllMcpTools([serverB])) as FunctionTool[];
+      const cachedTools = (await getAllMcpTools(
+        [serverB],
+        new RunContext({}),
+        new Agent({ name: 'test' }),
+      )) as FunctionTool[];
       await cachedTools[0].invoke({} as any, '{}');
 
       expect(called).toBe(true);
