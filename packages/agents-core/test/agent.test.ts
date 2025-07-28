@@ -217,6 +217,52 @@ describe('Agent', () => {
     );
   });
 
+  it('should expose finalOutput with stopAtToolNames using returnRunResult', async () => {
+    setDefaultModelProvider(new FakeModelProvider());
+
+    const subAgent = new Agent({
+      name: 'Echo',
+      instructions: 'Repeat what the user says.',
+    });
+
+    const queryTool = subAgent.asTool({
+      toolName: 'query_action_logs',
+      toolDescription: 'Echo tool that represents a long-running tool',
+    });
+
+    const outerAgent = new Agent({
+      name: 'Parent',
+      instructions: 'Use the tool then stop.',
+      tools: [queryTool],
+      toolUseBehavior: { stopAtToolNames: ['query_action_logs'] },
+    });
+
+    const outerToolDefault = outerAgent.asTool({
+      toolName: 'get_action_logs',
+    });
+
+    const outerToolWithRunResult = outerAgent.asTool({
+      toolName: 'get_action_logs_rich',
+      returnRunResult: true,
+    });
+
+    const input = JSON.stringify({ input: 'hello' });
+
+    const resultDefault = await outerToolDefault.invoke(
+      new RunContext({}),
+      input,
+    );
+    expect(resultDefault).toBe('Hello World');
+
+    const resultWithRunResult = await outerToolWithRunResult.invoke(
+      new RunContext({}),
+      input,
+    );
+    expect(
+      (resultWithRunResult as RunResult<any, Agent<any, any>>).finalOutput,
+    ).toBe('Hello World');
+  });
+
   it('should process final output (json schema)', async () => {
     const agent = new Agent({
       name: 'Test Agent',
