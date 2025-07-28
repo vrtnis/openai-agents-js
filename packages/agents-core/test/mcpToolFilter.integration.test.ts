@@ -5,6 +5,7 @@ import { NodeMCPServerStdio } from '../src/shims/mcp-server/node';
 import { createMCPToolStaticFilter } from '../src/mcpUtil';
 import { FakeModel, FakeModelProvider } from './stubs';
 import { Usage } from '../src/usage';
+import type { ModelResponse } from '../src';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
@@ -92,7 +93,7 @@ describe('MCP tool filter integration', () => {
   const tools = server.tools.map((t) => mcpToFunctionTool(t, server, false));
 
   it('allows listing files', async () => {
-    const modelResponses = [
+    const modelResponses: ModelResponse[] = [
       {
         output: [
           {
@@ -119,7 +120,7 @@ describe('MCP tool filter integration', () => {
   });
 
   it('blocks write_file', async () => {
-    const modelResponses = [
+    const modelResponses: ModelResponse[] = [
       {
         output: [
           {
