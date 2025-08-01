@@ -8,7 +8,7 @@ import logger from '../src/logger';
 
 const agent = new Agent({ name: 'A' });
 
-function createState(): RunState<unknown, Agent<any, any>> {
+function createState(): RunState<unknown, Agent<any, any>, any> {
   return new RunState(new RunContext(), '', agent, 1);
 }
 

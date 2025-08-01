@@ -1,5 +1,5 @@
 import { z } from '@openai/zod/v3';
-import { Agent } from './agent';
+import { Agent, AgentOutputType } from './agent';
 import {
   RunMessageOutputItem,
   RunItem,
@@ -241,7 +241,11 @@ export const SerializedRunState = z.object({
  * Manipulation of the state directly can lead to unexpected behavior and should be avoided.
  * Instead, use the `approve` and `reject` methods to interact with the state.
  */
-export class RunState<TContext, TAgent extends Agent<any, any>> {
+export class RunState<
+  TContext,
+  TAgent extends Agent<TContext, TAgentOutputType>,
+  TAgentOutputType extends AgentOutputType,
+> {
   /**
    * Current turn number in the conversation.
    */
@@ -450,10 +454,11 @@ export class RunState<TContext, TAgent extends Agent<any, any>> {
    * This method is used to deserialize a run state from a string that was serialized using the
    * `toString` method.
    */
-  static async fromString<TContext, TAgent extends Agent<any, any>>(
-    initialAgent: TAgent,
-    str: string,
-  ) {
+  static async fromString<
+    TContext,
+    TAgentOutputType extends AgentOutputType,
+    TAgent extends Agent<TContext, TAgentOutputType>,
+  >(initialAgent: TAgent, str: string) {
     const [parsingError, jsonResult] = await safeExecute(() => JSON.parse(str));
     if (parsingError) {
       throw new UserError(
@@ -491,7 +496,7 @@ export class RunState<TContext, TAgent extends Agent<any, any>> {
       throw new UserError(`Agent ${stateJson.currentAgent.name} not found`);
     }
 
-    const state = new RunState<TContext, TAgent>(
+    const state = new RunState<TContext, TAgent, TAgentOutputType>(
       context,
       '',
       currentAgent as TAgent,

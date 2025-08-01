@@ -26,7 +26,8 @@ import { StreamEventTextStream } from './types/protocol';
  * Data returned by the run() method of an agent.
  */
 export interface RunResultData<
-  TAgent extends Agent<any, any>,
+  TAgentOutputType extends AgentOutputType,
+  TAgent extends Agent<any, TAgentOutputType>,
   THandoffs extends (Agent<any, any> | Handoff<any>)[] = any[],
 > {
   /**
@@ -70,7 +71,7 @@ export interface RunResultData<
    * The output of the last agent, or any handoff agent.
    */
   finalOutput?:
-    | ResolvedAgentOutput<TAgent['outputType']>
+    | ResolvedAgentOutput<TAgentOutputType>
     | HandoffsOutput<THandoffs>;
 
   /**
@@ -81,15 +82,18 @@ export interface RunResultData<
   /**
    * The state of the run.
    */
-  state: RunState<any, TAgent>;
+  state: RunState<any, TAgent, TAgentOutputType>;
 }
 
-class RunResultBase<TContext, TAgent extends Agent<TContext, any>>
-  implements RunResultData<TAgent>
+class RunResultBase<
+  TContext,
+  TAgent extends Agent<TContext, TAgentOutputType>,
+  TAgentOutputType extends AgentOutputType,
+> implements RunResultData<TAgentOutputType, TAgent>
 {
-  readonly state: RunState<TContext, TAgent>;
+  readonly state: RunState<TContext, TAgent, TAgentOutputType>;
 
-  constructor(state: RunState<TContext, TAgent>) {
+  constructor(state: RunState<TContext, TAgent, TAgentOutputType>) {
     this.state = state;
   }
 
@@ -184,11 +188,11 @@ class RunResultBase<TContext, TAgent extends Agent<TContext, any>>
    * The final output of the agent. If the output type was set to anything other than `text`,
    * this will be parsed either as JSON or using the Zod schema you provided.
    */
-  get finalOutput(): ResolvedAgentOutput<TAgent['outputType']> | undefined {
+  get finalOutput(): ResolvedAgentOutput<TAgentOutputType> | undefined {
     if (this.state._currentStep?.type === 'next_step_final_output') {
       return this.state._currentAgent.processFinalOutput(
         this.state._currentStep.output,
-      ) as ResolvedAgentOutput<TAgent['outputType']>;
+      ) as ResolvedAgentOutput<TAgentOutputType>;
     }
 
     logger.warn('Accessed finalOutput before agent run is completed.');
@@ -201,9 +205,10 @@ class RunResultBase<TContext, TAgent extends Agent<TContext, any>>
  */
 export class RunResult<
   TContext,
-  TAgent extends Agent<TContext, AgentOutputType>,
-> extends RunResultBase<TContext, TAgent> {
-  constructor(state: RunState<TContext, TAgent>) {
+  TAgent extends Agent<TContext, TAgentOutputType>,
+  TAgentOutputType extends AgentOutputType,
+> extends RunResultBase<TContext, TAgent, TAgentOutputType> {
+  constructor(state: RunState<TContext, TAgent, TAgentOutputType>) {
     super(state);
   }
 }
@@ -213,9 +218,10 @@ export class RunResult<
  */
 export class StreamedRunResult<
     TContext,
-    TAgent extends Agent<TContext, AgentOutputType>,
+    TAgent extends Agent<TContext, TAgentOutputType>,
+    TAgentOutputType extends AgentOutputType,
   >
-  extends RunResultBase<TContext, TAgent>
+  extends RunResultBase<TContext, TAgent, TAgentOutputType>
   implements AsyncIterable<RunStreamEvent>
 {
   /**
@@ -246,7 +252,7 @@ export class StreamedRunResult<
 
   constructor(
     result: {
-      state: RunState<TContext, TAgent>;
+      state: RunState<TContext, TAgent, TAgentOutputType>;
       signal?: AbortSignal;
     } = {} as any,
   ) {
