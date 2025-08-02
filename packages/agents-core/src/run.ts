@@ -234,9 +234,12 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
     _THandoffs extends (Agent<any, any> | Handoff<any>)[] = any[],
   >(
     startingAgent: TAgent,
-    input: string | AgentInputItem[] | RunState<TContext, TAgent>,
+    input:
+      | string
+      | AgentInputItem[]
+      | RunState<TContext, TAgent, TAgent['outputType']>,
     options: NonStreamRunOptions<TContext>,
-  ): Promise<RunResult<TContext, TAgent>> {
+  ): Promise<RunResult<TContext, TAgent, TAgent['outputType']>> {
     return withNewSpanContext(async () => {
       // if we have a saved state we use that one, otherwise we create a new one
       const state =
@@ -295,7 +298,9 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
 
             if (turnResult.nextStep.type === 'next_step_interruption') {
               // we are still in an interruption, so we need to avoid an infinite loop
-              return new RunResult<TContext, TAgent>(state);
+              return new RunResult<TContext, TAgent, TAgent['outputType']>(
+                state,
+              );
             }
 
             continue;
@@ -441,7 +446,7 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
               state._context,
               state._currentStep.output,
             );
-            return new RunResult<TContext, TAgent>(state);
+            return new RunResult<TContext, TAgent, TAgent['outputType']>(state);
           } else if (
             state._currentStep &&
             state._currentStep.type === 'next_step_handoff'
@@ -461,7 +466,7 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
             state._currentStep.type === 'next_step_interruption'
           ) {
             // interrupted. Don't run any guardrails
-            return new RunResult<TContext, TAgent>(state);
+            return new RunResult<TContext, TAgent, TAgent['outputType']>(state);
           } else {
             logger.debug('Running next loop');
           }
@@ -489,7 +494,7 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
   async #runInputGuardrails<
     TContext,
     TAgent extends Agent<TContext, AgentOutputType>,
-  >(state: RunState<TContext, TAgent>) {
+  >(state: RunState<TContext, TAgent, TAgent['outputType']>) {
     const guardrails = this.inputGuardrailDefs.concat(
       state._currentAgent.inputGuardrails.map(defineInputGuardrail),
     );
@@ -547,7 +552,7 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
     TContext,
     TOutput extends AgentOutputType,
     TAgent extends Agent<TContext, TOutput>,
-  >(state: RunState<TContext, TAgent>, output: string) {
+  >(state: RunState<TContext, TAgent, TAgent['outputType']>, output: string) {
     const guardrails = this.outputGuardrailDefs.concat(
       state._currentAgent.outputGuardrails.map(defineOutputGuardrail),
     );
@@ -608,7 +613,7 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
     TContext,
     TAgent extends Agent<TContext, AgentOutputType>,
   >(
-    result: StreamedRunResult<TContext, TAgent>,
+    result: StreamedRunResult<TContext, TAgent, TAgent['outputType']>,
     options: StreamRunOptions<TContext>,
   ): Promise<void> {
     try {
@@ -863,13 +868,16 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
     TAgent extends Agent<TContext, AgentOutputType>,
   >(
     agent: TAgent,
-    input: string | AgentInputItem[] | RunState<TContext, TAgent>,
+    input:
+      | string
+      | AgentInputItem[]
+      | RunState<TContext, TAgent, TAgent['outputType']>,
     options?: StreamRunOptions<TContext>,
-  ): Promise<StreamedRunResult<TContext, TAgent>> {
+  ): Promise<StreamedRunResult<TContext, TAgent, TAgent['outputType']>> {
     options = options ?? ({} as StreamRunOptions<TContext>);
     return withNewSpanContext(async () => {
       // Initialize or reuse existing state
-      const state: RunState<TContext, TAgent> =
+      const state: RunState<TContext, TAgent, TAgent['outputType']> =
         input instanceof RunState
           ? input
           : new RunState(
@@ -882,7 +890,11 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
             );
 
       // Initialize the streamed result with existing state
-      const result = new StreamedRunResult<TContext, TAgent>({
+      const result = new StreamedRunResult<
+        TContext,
+        TAgent,
+        TAgent['outputType']
+      >({
         signal: options.signal,
         state,
       });
@@ -931,23 +943,33 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
    */
   run<TAgent extends Agent<any, any>, TContext = undefined>(
     agent: TAgent,
-    input: string | AgentInputItem[] | RunState<TContext, TAgent>,
+    input:
+      | string
+      | AgentInputItem[]
+      | RunState<TContext, TAgent, TAgent['outputType']>,
     options?: NonStreamRunOptions<TContext>,
-  ): Promise<RunResult<TContext, TAgent>>;
+  ): Promise<RunResult<TContext, TAgent, TAgent['outputType']>>;
   run<TAgent extends Agent<any, any>, TContext = undefined>(
     agent: TAgent,
-    input: string | AgentInputItem[] | RunState<TContext, TAgent>,
+    input:
+      | string
+      | AgentInputItem[]
+      | RunState<TContext, TAgent, TAgent['outputType']>,
     options?: StreamRunOptions<TContext>,
-  ): Promise<StreamedRunResult<TContext, TAgent>>;
+  ): Promise<StreamedRunResult<TContext, TAgent, TAgent['outputType']>>;
   run<TAgent extends Agent<any, any>, TContext = undefined>(
     agent: TAgent,
-    input: string | AgentInputItem[] | RunState<TContext, TAgent>,
+    input:
+      | string
+      | AgentInputItem[]
+      | RunState<TContext, TAgent, TAgent['outputType']>,
     options: IndividualRunOptions<TContext> = {
       stream: false,
       context: undefined,
     } as IndividualRunOptions<TContext>,
   ): Promise<
-    RunResult<TContext, TAgent> | StreamedRunResult<TContext, TAgent>
+    | RunResult<TContext, TAgent, TAgent['outputType']>
+    | StreamedRunResult<TContext, TAgent, TAgent['outputType']>
   > {
     if (input instanceof RunState && input._trace) {
       return withTrace(input._trace, async () => {
@@ -1009,19 +1031,31 @@ export function selectModel(
 
 export async function run<TAgent extends Agent<any, any>, TContext = undefined>(
   agent: TAgent,
-  input: string | AgentInputItem[] | RunState<TContext, TAgent>,
+  input:
+    | string
+    | AgentInputItem[]
+    | RunState<TContext, TAgent, TAgent['outputType']>,
   options?: NonStreamRunOptions<TContext>,
-): Promise<RunResult<TContext, TAgent>>;
+): Promise<RunResult<TContext, TAgent, TAgent['outputType']>>;
 export async function run<TAgent extends Agent<any, any>, TContext = undefined>(
   agent: TAgent,
-  input: string | AgentInputItem[] | RunState<TContext, TAgent>,
+  input:
+    | string
+    | AgentInputItem[]
+    | RunState<TContext, TAgent, TAgent['outputType']>,
   options?: StreamRunOptions<TContext>,
-): Promise<StreamedRunResult<TContext, TAgent>>;
+): Promise<StreamedRunResult<TContext, TAgent, TAgent['outputType']>>;
 export async function run<TAgent extends Agent<any, any>, TContext = undefined>(
   agent: TAgent,
-  input: string | AgentInputItem[] | RunState<TContext, TAgent>,
+  input:
+    | string
+    | AgentInputItem[]
+    | RunState<TContext, TAgent, TAgent['outputType']>,
   options?: StreamRunOptions<TContext> | NonStreamRunOptions<TContext>,
-): Promise<RunResult<TContext, TAgent> | StreamedRunResult<TContext, TAgent>> {
+): Promise<
+  | RunResult<TContext, TAgent, TAgent['outputType']>
+  | StreamedRunResult<TContext, TAgent, TAgent['outputType']>
+> {
   const runner = getDefaultRunner();
   if (options?.stream) {
     return await runner.run(agent, input, options);

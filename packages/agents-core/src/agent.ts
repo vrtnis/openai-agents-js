@@ -442,7 +442,7 @@ export class Agent<
      * from the agent will be used.
      */
     customOutputExtractor?: (
-      output: RunResult<TContext, Agent<TContext, any>>,
+      output: RunResult<TContext, Agent<TContext, any>, any>,
     ) => string | Promise<string>;
   }): FunctionTool {
     const { toolName, toolDescription, customOutputExtractor } = options;

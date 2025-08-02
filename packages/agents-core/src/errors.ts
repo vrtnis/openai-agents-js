@@ -11,9 +11,9 @@ import { TextOutput } from './types';
  * Base class for all errors thrown by the library.
  */
 export abstract class AgentsError extends Error {
-  state?: RunState<any, Agent<any, any>>;
+  state?: RunState<any, Agent<any, any>, any>;
 
-  constructor(message: string, state?: RunState<any, Agent<any, any>>) {
+  constructor(message: string, state?: RunState<any, Agent<any, any>, any>) {
     super(message);
     this.state = state;
   }
@@ -48,7 +48,7 @@ export class GuardrailExecutionError extends AgentsError {
   constructor(
     message: string,
     error: Error,
-    state?: RunState<any, Agent<any, any>>,
+    state?: RunState<any, Agent<any, any>, any>,
   ) {
     super(message, state);
     this.error = error;
@@ -63,7 +63,7 @@ export class ToolCallError extends AgentsError {
   constructor(
     message: string,
     error: Error,
-    state?: RunState<any, Agent<any, any>>,
+    state?: RunState<any, Agent<any, any>, any>,
   ) {
     super(message, state);
     this.error = error;
@@ -78,7 +78,7 @@ export class InputGuardrailTripwireTriggered extends AgentsError {
   constructor(
     message: string,
     result: InputGuardrailResult,
-    state?: RunState<any, any>,
+    state?: RunState<any, any, any>,
   ) {
     super(message, state);
     this.result = result;
@@ -96,7 +96,7 @@ export class OutputGuardrailTripwireTriggered<
   constructor(
     message: string,
     result: OutputGuardrailResult<TMeta, TOutputType>,
-    state?: RunState<any, any>,
+    state?: RunState<any, any, any>,
   ) {
     super(message, state);
     this.result = result;

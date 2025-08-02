@@ -143,7 +143,7 @@ describe('getToolCallOutputItem', () => {
 });
 
 describe('checkForFinalOutputFromTools', () => {
-  const state: RunState<any, any> = {} as any;
+  const state: RunState<any, any, any> = {} as any;
 
   // create a fake FunctionTool and corresponding result object that matches
   const weatherTool = tool({
@@ -471,7 +471,7 @@ describe('executeFunctionToolCalls', () => {
     });
   }
 
-  let state: RunState<any, any>;
+  let state: RunState<any, any, any>;
   let runner: Runner;
 
   beforeEach(() => {
@@ -741,7 +741,7 @@ describe('executeHandoffCalls', () => {
 });
 
 describe('checkForFinalOutputFromTools interruptions and errors', () => {
-  const state: RunState<any, any> = {} as any;
+  const state: RunState<any, any, any> = {} as any;
 
   it('returns interruptions when approval items present', async () => {
     const agent = new Agent({ name: 'A', toolUseBehavior: 'run_llm_again' });
@@ -870,7 +870,7 @@ describe('hasToolsOrApprovalsToRun method', () => {
 
 describe('executeToolsAndSideEffects', () => {
   let runner: Runner;
-  let state: RunState<any, any>;
+  let state: RunState<any, any, any>;
 
   beforeEach(() => {
     runner = new Runner({ tracingDisabled: true });

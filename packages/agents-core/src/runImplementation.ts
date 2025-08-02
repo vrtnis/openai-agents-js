@@ -300,7 +300,7 @@ export async function executeInterruptedToolsAndSideEffects<TContext>(
   newResponse: ModelResponse,
   processedResponse: ProcessedResponse,
   runner: Runner,
-  state: RunState<TContext, Agent<TContext, any>>,
+  state: RunState<TContext, Agent<TContext, any>, any>,
 ): Promise<SingleStepResult> {
   // call_ids for function tools
   const functionCallIds = originalPreStepItems
@@ -430,7 +430,7 @@ export async function executeToolsAndSideEffects<TContext>(
   newResponse: ModelResponse,
   processedResponse: ProcessedResponse<TContext>,
   runner: Runner,
-  state: RunState<TContext, Agent<TContext, any>>,
+  state: RunState<TContext, Agent<TContext, any>, any>,
 ): Promise<SingleStepResult> {
   const preStepItems = originalPreStepItems;
   let newItems = processedResponse.newItems;
@@ -658,7 +658,7 @@ export async function executeFunctionToolCalls<TContext = UnknownContext>(
   agent: Agent<any, any>,
   toolRuns: ToolRunFunction<unknown>[],
   runner: Runner,
-  state: RunState<TContext, Agent<any, any>>,
+  state: RunState<TContext, Agent<any, any>, any>,
 ): Promise<FunctionToolResult[]> {
   async function runSingleTool(toolRun: ToolRunFunction<unknown>) {
     let parsedArgs: any = toolRun.toolCall.arguments;
@@ -1064,7 +1064,7 @@ export async function checkForFinalOutputFromTools<
 >(
   agent: Agent<TContext, TOutput>,
   toolResults: FunctionToolResult[],
-  state: RunState<TContext, Agent<TContext, TOutput>>,
+  state: RunState<TContext, Agent<TContext, TOutput>, TOutput>,
 ): Promise<ToolsToFinalOutputResult> {
   if (toolResults.length === 0) {
     return NOT_FINAL_OUTPUT;
@@ -1123,7 +1123,7 @@ export async function checkForFinalOutputFromTools<
 }
 
 export function addStepToRunResult(
-  result: StreamedRunResult<any, any>,
+  result: StreamedRunResult<any, any, any>,
   step: SingleStepResult,
 ): void {
   for (const item of step.newStepItems) {
