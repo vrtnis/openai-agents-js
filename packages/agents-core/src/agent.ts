@@ -129,7 +129,7 @@ export interface AgentConfiguration<
     | string
     | ((
         runContext: RunContext<TContext>,
-        agent: Agent<TContext, TOutput>,
+        agent: Agent<TContext, any>,
       ) => Promise<string> | string);
 
   /**
@@ -143,7 +143,7 @@ export interface AgentConfiguration<
     | Prompt
     | ((
         runContext: RunContext<TContext>,
-        agent: Agent<TContext, TOutput>,
+        agent: Agent<TContext, any>,
       ) => Promise<Prompt> | Prompt);
 
   /**
@@ -317,13 +317,13 @@ export class Agent<
     | string
     | ((
         runContext: RunContext<TContext>,
-        agent: Agent<TContext, TOutput>,
+        agent: Agent<TContext, any>,
       ) => Promise<string> | string);
   prompt?:
     | Prompt
     | ((
         runContext: RunContext<TContext>,
-        agent: Agent<TContext, TOutput>,
+        agent: Agent<TContext, any>,
       ) => Promise<Prompt> | Prompt);
   handoffDescription: string;
   handoffs: (Agent<any, TOutput> | Handoff<any, TOutput>)[];

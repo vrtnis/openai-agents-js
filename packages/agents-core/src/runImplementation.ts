@@ -655,10 +655,10 @@ export function getToolCallOutputItem(
  * @internal
  */
 export async function executeFunctionToolCalls<TContext = UnknownContext>(
-  agent: Agent<any, any>,
+  agent: Agent<TContext, any>,
   toolRuns: ToolRunFunction<unknown>[],
   runner: Runner,
-  state: RunState<TContext, Agent<any, any>>,
+  state: RunState<TContext, Agent<TContext, any>>,
 ): Promise<FunctionToolResult[]> {
   async function runSingleTool(toolRun: ToolRunFunction<unknown>) {
     let parsedArgs: any = toolRun.toolCall.arguments;
