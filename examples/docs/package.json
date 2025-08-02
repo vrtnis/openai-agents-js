@@ -15,6 +15,7 @@
     "build-check": "tsc --noEmit"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250802.0",
     "typedoc-plugin-zod": "^1.4.1"
   }
 }
