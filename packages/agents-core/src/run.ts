@@ -230,7 +230,7 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
    */
   async #runIndividualNonStream<
     TContext,
-    TAgent extends Agent<TContext, AgentOutputType>,
+    TAgent extends Agent<TContext, any>,
     _THandoffs extends (Agent<any, any> | Handoff<any>)[] = any[],
   >(
     startingAgent: TAgent,
@@ -486,10 +486,9 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
     });
   }
 
-  async #runInputGuardrails<
-    TContext,
-    TAgent extends Agent<TContext, AgentOutputType>,
-  >(state: RunState<TContext, TAgent>) {
+  async #runInputGuardrails<TContext, TAgent extends Agent<TContext, any>>(
+    state: RunState<TContext, TAgent>,
+  ) {
     const guardrails = this.inputGuardrailDefs.concat(
       state._currentAgent.inputGuardrails.map(defineInputGuardrail),
     );
@@ -543,17 +542,19 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
     }
   }
 
-  async #runOutputGuardrails<
-    TContext,
-    TOutput extends AgentOutputType,
-    TAgent extends Agent<TContext, TOutput>,
-  >(state: RunState<TContext, TAgent>, output: string) {
+  async #runOutputGuardrails<TContext, TAgent extends Agent<TContext, any>>(
+    state: RunState<TContext, TAgent>,
+    output: string,
+  ) {
     const guardrails = this.outputGuardrailDefs.concat(
       state._currentAgent.outputGuardrails.map(defineOutputGuardrail),
     );
     if (guardrails.length > 0) {
       const agentOutput = state._currentAgent.processFinalOutput(output);
-      const guardrailArgs: OutputGuardrailFunctionArgs<unknown, TOutput> = {
+      const guardrailArgs: OutputGuardrailFunctionArgs<
+        unknown,
+        TAgent['outputType']
+      > = {
         agent: state._currentAgent,
         agentOutput,
         context: state._context,
@@ -604,10 +605,7 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
   /**
    * @internal
    */
-  async #runStreamLoop<
-    TContext,
-    TAgent extends Agent<TContext, AgentOutputType>,
-  >(
+  async #runStreamLoop<TContext, TAgent extends Agent<TContext, any>>(
     result: StreamedRunResult<TContext, TAgent>,
     options: StreamRunOptions<TContext>,
   ): Promise<void> {
@@ -858,10 +856,7 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
   /**
    * @internal
    */
-  async #runIndividualStream<
-    TContext,
-    TAgent extends Agent<TContext, AgentOutputType>,
-  >(
+  async #runIndividualStream<TContext, TAgent extends Agent<TContext, any>>(
     agent: TAgent,
     input: string | AgentInputItem[] | RunState<TContext, TAgent>,
     options?: StreamRunOptions<TContext>,

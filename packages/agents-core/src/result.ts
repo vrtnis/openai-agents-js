@@ -1,4 +1,4 @@
-import { Agent, AgentOutputType } from './agent';
+import { Agent } from './agent';
 import { Handoff } from './handoff';
 import {
   ResolvedAgentOutput,
@@ -26,7 +26,8 @@ import { StreamEventTextStream } from './types/protocol';
  * Data returned by the run() method of an agent.
  */
 export interface RunResultData<
-  TAgent extends Agent<any, any>,
+  TContext,
+  TAgent extends Agent<TContext, any>,
   THandoffs extends (Agent<any, any> | Handoff<any>)[] = any[],
 > {
   /**
@@ -81,11 +82,11 @@ export interface RunResultData<
   /**
    * The state of the run.
    */
-  state: RunState<any, TAgent>;
+  state: RunState<TContext, TAgent>;
 }
 
 class RunResultBase<TContext, TAgent extends Agent<TContext, any>>
-  implements RunResultData<TAgent>
+  implements RunResultData<TContext, TAgent>
 {
   readonly state: RunState<TContext, TAgent>;
 
@@ -201,7 +202,7 @@ class RunResultBase<TContext, TAgent extends Agent<TContext, any>>
  */
 export class RunResult<
   TContext,
-  TAgent extends Agent<TContext, AgentOutputType>,
+  TAgent extends Agent<TContext, any>,
 > extends RunResultBase<TContext, TAgent> {
   constructor(state: RunState<TContext, TAgent>) {
     super(state);
@@ -211,10 +212,7 @@ export class RunResult<
 /**
  * The result of an agent run in streaming mode.
  */
-export class StreamedRunResult<
-    TContext,
-    TAgent extends Agent<TContext, AgentOutputType>,
-  >
+export class StreamedRunResult<TContext, TAgent extends Agent<TContext, any>>
   extends RunResultBase<TContext, TAgent>
   implements AsyncIterable<RunStreamEvent>
 {

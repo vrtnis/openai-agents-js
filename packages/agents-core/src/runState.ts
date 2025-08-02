@@ -241,7 +241,7 @@ export const SerializedRunState = z.object({
  * Manipulation of the state directly can lead to unexpected behavior and should be avoided.
  * Instead, use the `approve` and `reject` methods to interact with the state.
  */
-export class RunState<TContext, TAgent extends Agent<any, any>> {
+export class RunState<TContext, TAgent extends Agent<TContext, any>> {
   /**
    * Current turn number in the conversation.
    */
@@ -450,7 +450,7 @@ export class RunState<TContext, TAgent extends Agent<any, any>> {
    * This method is used to deserialize a run state from a string that was serialized using the
    * `toString` method.
    */
-  static async fromString<TContext, TAgent extends Agent<any, any>>(
+  static async fromString<TContext, TAgent extends Agent<TContext, any>>(
     initialAgent: TAgent,
     str: string,
   ) {
