@@ -293,14 +293,18 @@ export function maybeResetToolChoice(
 /**
  * @internal
  */
-export async function executeInterruptedToolsAndSideEffects<TContext>(
-  agent: Agent<TContext, any>,
+export async function executeInterruptedToolsAndSideEffects<
+  TContext,
+  TAgent extends Agent<TContext, any> = Agent<TContext, any>,
+  TOutput extends AgentOutputType = AgentOutputType,
+>(
+  agent: TAgent,
   originalInput: string | AgentInputItem[],
   originalPreStepItems: RunItem[],
   newResponse: ModelResponse,
   processedResponse: ProcessedResponse,
   runner: Runner,
-  state: RunState<TContext, Agent<TContext, any>, any>,
+  state: RunState<TContext, TAgent, TOutput>,
 ): Promise<SingleStepResult> {
   // call_ids for function tools
   const functionCallIds = originalPreStepItems
@@ -317,10 +321,10 @@ export async function executeInterruptedToolsAndSideEffects<TContext>(
   });
 
   const functionResults = await executeFunctionToolCalls(
-    agent,
+    agent as any,
     functionToolRuns,
     runner,
-    state,
+    state as RunState<TContext, Agent<any, TOutput>, TOutput>,
   );
 
   // Create the initial set of the output items
@@ -358,16 +362,16 @@ export async function executeInterruptedToolsAndSideEffects<TContext>(
             name: 'mcp_approval_response',
             providerData,
           },
-          agent as Agent<unknown, 'text'>,
+          agent as unknown as Agent<unknown, 'text'>,
         ),
       );
     }
   }
 
   const checkToolOutput = await checkForFinalOutputFromTools(
-    agent,
+    agent as Agent<TContext, TOutput>,
     functionResults,
-    state,
+    state as RunState<TContext, Agent<TContext, TOutput>, TOutput>,
   );
 
   // Exclude the tool approval items, which should not be sent to Responses API,
@@ -380,7 +384,7 @@ export async function executeInterruptedToolsAndSideEffects<TContext>(
     runner.emit(
       'agent_end',
       state._context,
-      agent,
+      agent as any,
       checkToolOutput.finalOutput,
     );
     agent.emit('agent_end', state._context, checkToolOutput.finalOutput);
@@ -423,27 +427,31 @@ export async function executeInterruptedToolsAndSideEffects<TContext>(
 /**
  * @internal
  */
-export async function executeToolsAndSideEffects<TContext>(
-  agent: Agent<TContext, any>,
+export async function executeToolsAndSideEffects<
+  TContext,
+  TAgent extends Agent<TContext, any> = Agent<TContext, any>,
+  TOutput extends AgentOutputType = AgentOutputType,
+>(
+  agent: TAgent,
   originalInput: string | AgentInputItem[],
   originalPreStepItems: RunItem[],
   newResponse: ModelResponse,
   processedResponse: ProcessedResponse<TContext>,
   runner: Runner,
-  state: RunState<TContext, Agent<TContext, any>, any>,
+  state: RunState<TContext, TAgent, TOutput>,
 ): Promise<SingleStepResult> {
   const preStepItems = originalPreStepItems;
   let newItems = processedResponse.newItems;
 
   const [functionResults, computerResults] = await Promise.all([
     executeFunctionToolCalls(
-      agent,
+      agent as any,
       processedResponse.functions as ToolRunFunction<unknown>[],
       runner,
-      state,
+      state as RunState<TContext, Agent<any, TOutput>, TOutput>,
     ),
     executeComputerActions(
-      agent,
+      agent as any,
       processedResponse.computerActions,
       runner,
       state._context,
@@ -478,7 +486,7 @@ export async function executeToolsAndSideEffects<TContext>(
               name: 'mcp_approval_response',
               providerData: approvalResponseData,
             },
-            agent as Agent<unknown, 'text'>,
+            agent as unknown as Agent<unknown, 'text'>,
           ),
         );
       } else {
@@ -508,7 +516,7 @@ export async function executeToolsAndSideEffects<TContext>(
   // process handoffs
   if (processedResponse.handoffs.length > 0) {
     return await executeHandoffCalls(
-      agent,
+      agent as Agent<TContext, TOutput>,
       originalInput,
       preStepItems,
       newItems,
@@ -520,16 +528,16 @@ export async function executeToolsAndSideEffects<TContext>(
   }
 
   const checkToolOutput = await checkForFinalOutputFromTools(
-    agent,
+    agent as Agent<TContext, TOutput>,
     functionResults,
-    state,
+    state as RunState<TContext, Agent<TContext, TOutput>, TOutput>,
   );
 
   if (checkToolOutput.isFinalOutput) {
     runner.emit(
       'agent_end',
       state._context,
-      agent,
+      agent as any,
       checkToolOutput.finalOutput,
     );
     agent.emit('agent_end', state._context, checkToolOutput.finalOutput);
@@ -600,7 +608,7 @@ export async function executeToolsAndSideEffects<TContext>(
   } else if (agent.outputType !== 'text' && potentialFinalOutput) {
     // Structured output schema => always leads to a final output if we have text
     const { parser } = getSchemaAndParserFromInputType(
-      agent.outputType,
+      agent.outputType as any,
       'final_output',
     );
     const [error] = await safeExecute(() => parser(potentialFinalOutput));
@@ -654,11 +662,14 @@ export function getToolCallOutputItem(
 /**
  * @internal
  */
-export async function executeFunctionToolCalls<TContext = UnknownContext>(
+export async function executeFunctionToolCalls<
+  TContext = UnknownContext,
+  TOutput extends AgentOutputType = AgentOutputType,
+>(
   agent: Agent<any, any>,
   toolRuns: ToolRunFunction<unknown>[],
   runner: Runner,
-  state: RunState<TContext, Agent<any, any>, any>,
+  state: RunState<TContext, Agent<any, TOutput>, TOutput>,
 ): Promise<FunctionToolResult[]> {
   async function runSingleTool(toolRun: ToolRunFunction<unknown>) {
     let parsedArgs: any = toolRun.toolCall.arguments;
@@ -1122,10 +1133,9 @@ export async function checkForFinalOutputFromTools<
   throw new UserError(`Invalid toolUseBehavior: ${toolUseBehavior}`, state);
 }
 
-export function addStepToRunResult(
-  result: StreamedRunResult<any, any, any>,
-  step: SingleStepResult,
-): void {
+export function addStepToRunResult<
+  TOutput extends AgentOutputType = AgentOutputType,
+>(result: StreamedRunResult<any, any, TOutput>, step: SingleStepResult): void {
   for (const item of step.newStepItems) {
     let itemName: RunItemStreamEventName;
     if (item instanceof RunMessageOutputItem) {
