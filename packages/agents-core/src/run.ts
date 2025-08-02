@@ -493,8 +493,9 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
 
   async #runInputGuardrails<
     TContext,
-    TAgent extends Agent<TContext, AgentOutputType>,
-  >(state: RunState<TContext, TAgent, TAgent['outputType']>) {
+    TOutput extends AgentOutputType,
+    TAgent extends Agent<TContext, TOutput>,
+  >(state: RunState<TContext, TAgent, TOutput>) {
     const guardrails = this.inputGuardrailDefs.concat(
       state._currentAgent.inputGuardrails.map(defineInputGuardrail),
     );
@@ -552,7 +553,7 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
     TContext,
     TOutput extends AgentOutputType,
     TAgent extends Agent<TContext, TOutput>,
-  >(state: RunState<TContext, TAgent, TAgent['outputType']>, output: string) {
+  >(state: RunState<TContext, TAgent, TOutput>, output: string) {
     const guardrails = this.outputGuardrailDefs.concat(
       state._currentAgent.outputGuardrails.map(defineOutputGuardrail),
     );
@@ -611,9 +612,10 @@ export class Runner extends RunHooks<any, AgentOutputType<unknown>> {
    */
   async #runStreamLoop<
     TContext,
-    TAgent extends Agent<TContext, AgentOutputType>,
+    TOutput extends AgentOutputType,
+    TAgent extends Agent<TContext, TOutput>,
   >(
-    result: StreamedRunResult<TContext, TAgent, TAgent['outputType']>,
+    result: StreamedRunResult<TContext, TAgent, TOutput>,
     options: StreamRunOptions<TContext>,
   ): Promise<void> {
     try {
