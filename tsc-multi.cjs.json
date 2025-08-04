@@ -1,0 +1,9 @@
+{
+  "targets": [
+    { "extname": ".cjs", "module": "commonjs", "moduleResolution": "node" }
+  ],
+  "projects": [
+    "packages/agents-core/tsconfig.cjs.json",
+    "packages/agents/tsconfig.cjs.json"
+  ]
+}

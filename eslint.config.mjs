@@ -18,6 +18,7 @@ import { globalIgnores } from 'eslint/config';
 export default tseslint.config(
   globalIgnores([
     '**/dist/**',
+    '**/dist-cjs/**',
     '**/node_modules/**',
     '**/docs/.astro/**',
     'examples/realtime-next/**',
