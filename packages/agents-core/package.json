@@ -17,39 +17,33 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "require": "./dist-cjs/index.cjs"
+      "require": "./dist-cjs/index.cjs",
+      "types": "./dist/index.d.ts"
     },
     "./model": {
       "import": "./dist/model.js",
-      "require": "./dist-cjs/model.cjs"
+      "require": "./dist-cjs/model.cjs",
+      "types": "./dist/model.d.ts"
     },
     "./utils": {
       "import": "./dist/utils/index.js",
-      "require": "./dist-cjs/utils/index.cjs"
+      "require": "./dist-cjs/utils/index.cjs",
+      "types": "./dist/utils/index.d.ts"
     },
     "./extensions": {
       "import": "./dist/extensions/index.js",
-      "require": "./dist-cjs/extensions/index.cjs"
+      "require": "./dist-cjs/extensions/index.cjs",
+      "types": "./dist/extensions/index.d.ts"
     },
     "./types": {
       "import": "./dist/types/index.js",
-      "require": "./dist-cjs/types/index.cjs"
+      "require": "./dist-cjs/types/index.cjs",
+      "types": "./dist/types/index.d.ts"
     },
     "./_shims": {
       "import": "./dist/shims/shims-node.mjs",
       "require": "./dist-cjs/shims/shims-node.cjs",
-      "workerd": {
-        "import": "./dist/shims/shims-workerd.mjs",
-        "require": "./dist-cjs/shims/shims-workerd.cjs"
-      },
-      "browser": {
-        "import": "./dist/shims/shims-browser.mjs",
-        "require": "./dist-cjs/shims/shims-browser.cjs"
-      },
-      "node": {
-        "import": "./dist/shims/shims-node.mjs",
-        "require": "./dist-cjs/shims/shims-node.cjs"
-      }
+      "types": "./dist/shims/shims-node.d.ts"
     }
   },
   "keywords": [

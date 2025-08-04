@@ -11,15 +11,23 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "require": "./dist-cjs/index.cjs"
+      "require": "./dist-cjs/index.cjs",
+      "types": "./dist/index.d.ts"
     },
     "./realtime": {
       "import": "./dist/realtime/index.js",
-      "require": "./dist-cjs/realtime/index.cjs"
+      "require": "./dist-cjs/realtime/index.cjs",
+      "types": "./dist/realtime/index.d.ts"
     },
     "./utils": {
       "import": "./dist/utils/index.js",
-      "require": "./dist-cjs/utils/index.cjs"
+      "require": "./dist-cjs/utils/index.cjs",
+      "types": "./dist/utils/index.d.ts"
+    },
+    "./_shims": {
+      "import": "./dist/shims/shims-node.mjs",
+      "require": "./dist-cjs/shims/shims-node.cjs",
+      "types": "./dist/shims/shims-node.d.ts"
     }
   },
   "scripts": {
@@ -56,6 +64,9 @@
       ],
       "utils": [
         "dist/utils/index.d.ts"
+      ],
+      "_shims": [
+        "dist/shims/shims-node.d.ts"
       ]
     }
   }
