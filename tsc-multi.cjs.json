@@ -4,6 +4,7 @@
   ],
   "projects": [
     "packages/agents-core/tsconfig.cjs.json",
-    "packages/agents/tsconfig.cjs.json"
+    "packages/agents/tsconfig.cjs.json",
+    "packages/agents-openai/tsconfig.cjs.json"
   ]
 }
