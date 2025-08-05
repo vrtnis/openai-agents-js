@@ -6,26 +6,47 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   build: {
+    // Run this as a Node lib, not a browser bundle
+    target: 'node16',
+    platform: 'node',
+
     lib: {
       entry: resolve(__dirname, 'dist/index.mjs'),
       name: 'OpenAIAgentsRealtime',
-      // the proper extensions will be added
       fileName: 'openai-realtime-agents',
+      // only emit ESM (remove 'umd' which is the default 3rd format)
+      formats: ['es'],
     },
+
     sourcemap: 'inline',
+
     rollupOptions: {
-      // make sure to externalize deps that shouldn't be bundled
-      // into your library
-      external: [],
+      // Externalize all Node built-ins & optional SDK
+      external: (id) => {
+        if (id.startsWith('node:')) return true;
+        const builtins = [
+          'fs',
+          'path',
+          'events',
+          'stream',
+          'stream/web',
+          'async_hooks',
+          'timers',
+          'crypto',
+          'child_process',
+        ];
+        if (builtins.includes(id)) return true;
+        if (id === '@modelcontextprotocol/sdk' || id === 'cross-spawn')
+          return true;
+        return false;
+      },
+
       output: {
         dir: 'dist/bundle',
         banner: '/** OpenAI Agents Realtime **/',
         minifyInternalExports: false,
-        // Provide global variables to use in the UMD build
-        // for externalized deps
-        globals: {
-          // vue: 'Vue',
-        },
+        // no need for UMD globals now since we’re not building UMD
+        globals: {},
       },
     },
   },
