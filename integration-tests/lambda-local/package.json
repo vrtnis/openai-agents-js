@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "dependencies": {
+    "@openai/agents": "latest",
+    "lambda-local": "^2.2.0"
+  }
+}

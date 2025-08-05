@@ -14,11 +14,13 @@ declare global {
 // circular dependency resolution issues caused by other exports in '@openai/agents-core/_shims'
 export function loadEnv(): Record<string, string | undefined> {
   if (typeof process === 'undefined' || typeof process.env === 'undefined') {
-    if (
-      typeof import.meta === 'object' &&
-      typeof import.meta.env === 'object'
-    ) {
-      return import.meta.env as unknown as Record<string, string | undefined>;
+    try {
+      const m = (0, eval)('import.meta');
+      if (typeof m === 'object' && typeof m.env === 'object') {
+        return m.env as unknown as Record<string, string | undefined>;
+      }
+    } catch {
+      /* CJS. */
     }
     return {};
   }
