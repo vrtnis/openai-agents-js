@@ -10,24 +10,24 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist-cjs/index.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist-cjs/index.cjs"
     },
     "./realtime": {
+      "types": "./dist/realtime/index.d.ts",
       "import": "./dist/realtime/index.js",
-      "require": "./dist-cjs/realtime/index.cjs",
-      "types": "./dist/realtime/index.d.ts"
+      "require": "./dist-cjs/realtime/index.cjs"
     },
     "./utils": {
+      "types": "./dist/utils/index.d.ts",
       "import": "./dist/utils/index.js",
-      "require": "./dist-cjs/utils/index.cjs",
-      "types": "./dist/utils/index.d.ts"
+      "require": "./dist-cjs/utils/index.cjs"
     },
     "./_shims": {
+      "types": "./dist/shims/shims-node.d.ts",
       "import": "./dist/shims/shims-node.mjs",
-      "require": "./dist-cjs/shims/shims-node.cjs",
-      "types": "./dist/shims/shims-node.d.ts"
+      "require": "./dist-cjs/shims/shims-node.cjs"
     }
   },
   "scripts": {

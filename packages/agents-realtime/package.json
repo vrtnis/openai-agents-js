@@ -10,14 +10,14 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist-cjs/index.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist-cjs/index.cjs"
     },
     "./_shims": {
+      "types": "./dist/shims/shims-node.d.ts",
       "import": "./dist/shims/shims-node.mjs",
-      "require": "./dist-cjs/shims/shims-node.cjs",
-      "types": "./dist/shims/shims-node.d.ts"
+      "require": "./dist-cjs/shims/shims-node.cjs"
     }
   },
   "scripts": {
