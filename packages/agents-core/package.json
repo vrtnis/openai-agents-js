@@ -16,34 +16,34 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist-cjs/index.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist-cjs/index.cjs"
     },
     "./model": {
+      "types": "./dist/model.d.ts",
       "import": "./dist/model.js",
-      "require": "./dist-cjs/model.cjs",
-      "types": "./dist/model.d.ts"
+      "require": "./dist-cjs/model.cjs"
     },
     "./utils": {
+      "types": "./dist/utils/index.d.ts",
       "import": "./dist/utils/index.js",
-      "require": "./dist-cjs/utils/index.cjs",
-      "types": "./dist/utils/index.d.ts"
+      "require": "./dist-cjs/utils/index.cjs"
     },
     "./extensions": {
+      "types": "./dist/extensions/index.d.ts",
       "import": "./dist/extensions/index.js",
-      "require": "./dist-cjs/extensions/index.cjs",
-      "types": "./dist/extensions/index.d.ts"
+      "require": "./dist-cjs/extensions/index.cjs"
     },
     "./types": {
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/types/index.js",
-      "require": "./dist-cjs/types/index.cjs",
-      "types": "./dist/types/index.d.ts"
+      "require": "./dist-cjs/types/index.cjs"
     },
     "./_shims": {
+      "types": "./dist/shims/shims-node.d.ts",
       "import": "./dist/shims/shims-node.mjs",
-      "require": "./dist-cjs/shims/shims-node.cjs",
-      "types": "./dist/shims/shims-node.d.ts"
+      "require": "./dist-cjs/shims/shims-node.cjs"
     }
   },
   "keywords": [
