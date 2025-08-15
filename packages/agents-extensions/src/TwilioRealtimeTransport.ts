@@ -98,7 +98,7 @@ export class TwilioRealtimeTransportLayer extends OpenAIRealtimeWebSocket {
           } else {
             this.#logger.debug('Twilio message:', data);
           }
-          this.emit('*', {
+          (this as any).emit?.('*', {
             type: 'twilio_message',
             message: data,
           });
@@ -140,7 +140,7 @@ export class TwilioRealtimeTransportLayer extends OpenAIRealtimeWebSocket {
             'Message:',
             message,
           );
-          this.emit('error', {
+          (this as any).emit?.('error', {
             type: 'error',
             error,
           });
@@ -155,14 +155,14 @@ export class TwilioRealtimeTransportLayer extends OpenAIRealtimeWebSocket {
     this.#twilioWebSocket.addEventListener(
       'error',
       (error: ErrorEvent | NodeErrorEvent) => {
-        this.emit('error', {
+        (this as any).emit?.('error', {
           type: 'error',
           error,
         });
         this.close();
       },
     );
-    this.on('audio_done', () => {
+    (this as any).on?.('audio_done', () => {
       this.#twilioWebSocket.send(
         JSON.stringify({
           event: 'mark',
@@ -178,7 +178,7 @@ export class TwilioRealtimeTransportLayer extends OpenAIRealtimeWebSocket {
 
   updateSessionConfig(config: Partial<RealtimeSessionConfig>): void {
     const newConfig = this._setInputAndOutputAudioFormat(config);
-    super.updateSessionConfig(newConfig);
+    (this as any).updateSessionConfig?.(newConfig);
   }
 
   _interrupt(_elapsedTime: number, cancelOngoingResponse: boolean = true) {
@@ -221,6 +221,6 @@ export class TwilioRealtimeTransportLayer extends OpenAIRealtimeWebSocket {
         },
       }),
     );
-    this.emit('audio', audioEvent);
+    (this as any).emit?.('audio', audioEvent);
   }
 }

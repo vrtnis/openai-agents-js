@@ -7,7 +7,7 @@
     "prebuild": "pnpm -F @openai/* -r prebuild",
     "build:esm": "tsc-multi",
     "build:cjs": "tsc-multi --config tsc-multi.cjs.json",
-    "build": "npm run build:esm && npm run build:cjs",
+    "build": "tsc-multi && tsc-multi --config tsc-multi.cjs.json",
     "postbuild": "pnpm -r -F @openai/* bundle",
     "packages:dev": "tsc-multi --watch",
     "docs:dev": "pnpm -F docs dev",
